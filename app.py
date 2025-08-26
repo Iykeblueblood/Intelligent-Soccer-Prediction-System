@@ -19,7 +19,7 @@ FOOTBALL_DATA_API_KEY = get_secret("footballdata", "api_key")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+    gemini_model = genai.GenerativeModel('gemini-2.5-flash')
     GEMINI_ENABLED = True
 else:
     GEMINI_ENABLED = False
@@ -105,7 +105,7 @@ LA_LIGA_MAP = {
     "Athletic Club": "Ath Bilbao", "Club Atlético de Madrid": "Ath Madrid", "CA Osasuna": "Osasuna",
     "Cádiz CF": "Cadiz", "Deportivo Alavés": "Alaves", "FC Barcelona": "Barcelona",
     "Getafe CF": "Getafe", "Girona FC": "Girona", "Granada CF": "Granada",
-    "Rayo Vallecano de Madrid": "Rayo Vallecano", "RC Celta de Vigo": "Celta Vigo",
+    "Rayo Vallecano de Madrid": "Rayo Vallecano", "RC Celta de Vigo": "Celta Vigo", "RCD Espanyol de Barcelona": "Espanyol",
     "RCD Mallorca": "Mallorca", "Real Betis Balompié": "Betis", "Real Madrid CF": "Real Madrid",
     "Real Sociedad de Fútbol": "Real Sociedad", "Sevilla FC": "Sevilla", "UD Almería": "Almeria",
     "UD Las Palmas": "Las Palmas", "Valencia CF": "Valencia", "Villarreal CF": "Villarreal"
@@ -256,3 +256,4 @@ if not GEMINI_API_KEY: st.sidebar.warning("Gemini key missing.")
 if ml_model is None: st.sidebar.error(f"ML Model Error for {selected_league_name}: {ml_status}")
 
 if historical_df is None: st.sidebar.error(f"Historical Data Error for {selected_league_name}: {historical_status}")
+
