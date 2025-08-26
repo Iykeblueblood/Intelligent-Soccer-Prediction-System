@@ -19,7 +19,7 @@ FOOTBALL_DATA_API_KEY = get_secret("footballdata", "api_key")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    gemini_model = genai.GenerativeModel('gemini-2.5-flash')
+    gemini_model = genai.GenerativeModel('gemini-2.5-flash-lite')
     GEMINI_ENABLED = True
 else:
     GEMINI_ENABLED = False
@@ -168,11 +168,44 @@ def get_ml_prediction(model, home_stats, away_stats):
     pred_map = {1: "Home Win", 0: "Draw", 2: "Away Win"}
     return f"{pred_map[pred_code]} ({np.max(probs)*100:.1f}% confidence)", probs
 
+# --- FINAL, CORRECTED GEMINI FUNCTION ---
 def get_gemini_analysis(team1_name, team2_name, team1_data, team2_data, rb_prediction, ml_prediction, h2h_summary):
-    if not GEMINI_ENABLED: return "Gemini API key not configured."
-    prompt = f"Act as an expert sports analyst. Analyze this upcoming football match.\n\n**Match & Team Data:**\n- Home Team: {team1_name}\n- Home Team Recent Form Details: {team1_data['form_string']}\n- Away Team: {team2_name}\n- Away Team Recent Form Details: {team2_data['form_string']}\n\n**{h2h_summary}**\n\n**System Predictions:**\n- Rule-Based Engine Prediction: \"{rb_prediction}\"\n- Machine Learning Model Prediction: \"{ml_prediction}\"\n\n**Your Task:**\nProvide a final, nuanced expert verdict (2-3 paragraphs).\n1. Synthesize the predictions from the two systems.\n2. **Analyze the details of the recent form.** Do not just look at Win/Loss. Look at the scorelines. A 5-0 win is more impressive than a 1-0 win. A narrow 1-2 loss to a strong team is better than a 0-4 loss to a weak team.\n3. Incorporate the head-to-head history. Is there a psychological advantage or a clear pattern?\n4. If the predictions disagree, explore why. Does the quality of recent form (e.g., a dominant win) contradict the overall ML model prediction?\n5. Conclude with your definitive expert prediction and your most important reasoning."
-    try: return genai.GenerativeModel('gemini-1.5-flash').generate_content(prompt).text
-    except Exception as e: return f"An error with the Gemini API: {e}"
+    if not GEMINI_ENABLED:
+        return "Gemini API key not configured."
+
+    # Use the detailed form string which includes scores and opponents
+    t1_form_details = team1_data['form_string']
+    t2_form_details = team2_data['form_string']
+
+    prompt = f"""
+    Act as an expert sports analyst. Analyze this upcoming football match with the following data:
+
+    **Match & Team Data:**
+    - Home Team: {team1_name}
+    - Home Team Recent Form Details: {t1_form_details}
+    - Away Team: {team2_name}
+    - Away Team Recent Form Details: {t2_form_details}
+
+    **Recent Head-to-Head History:**
+    {h2h_summary}
+
+    **System Predictions:**
+    - Rule-Based Engine Prediction: "{rb_prediction}"
+    - Machine Learning Model Prediction: "{ml_prediction}"
+
+    **Your Task:**
+    Provide a final, nuanced expert verdict (2-3 paragraphs).
+    1.  Synthesize the predictions from the two systems.
+    2.  **Analyze the details of the recent form.** Do not just look at Win/Loss. Look at the scorelines. A 5-0 win is more impressive than a 1-0 win. A narrow 1-2 loss to a strong team is better than a 0-4 loss to a weak team.
+    3.  Incorporate the head-to-head history. Is there a psychological advantage or a clear pattern?
+    4.  If the predictions disagree, explore why. Does the quality of recent form (e.g., a dominant win) contradict the overall ML model prediction?
+    5.  Conclude with your definitive expert prediction and your most important reasoning.
+    """
+    try:
+        response = gemini_model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"An error occurred with the Gemini API: {e}"
 
 # --- Streamlit App UI ---
 st.set_page_config(layout="wide")
@@ -254,6 +287,4 @@ st.sidebar.markdown("---")
 if not FOOTBALL_DATA_API_KEY: st.sidebar.warning("Football-data.org key missing.")
 if not GEMINI_API_KEY: st.sidebar.warning("Gemini key missing.")
 if ml_model is None: st.sidebar.error(f"ML Model Error for {selected_league_name}: {ml_status}")
-
 if historical_df is None: st.sidebar.error(f"Historical Data Error for {selected_league_name}: {historical_status}")
-
