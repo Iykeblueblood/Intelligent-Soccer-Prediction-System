@@ -5,8 +5,7 @@ An advanced football match prediction system that leverages a multi-layered anal
 
 ### 🚀 Live
 
-**[View the live application here](https://intelligent-soccer-prediction-system.streamlit.app/))** 
-*(Remember to replace this link with your actual Streamlit Community Cloud URL after you deploy it!)*
+**(https://intelligent-soccer-prediction-system.streamlit.app/)** 
 
 
 ### ✨ Key Features
