@@ -19,7 +19,7 @@ FOOTBALL_DATA_API_KEY = get_secret("footballdata", "api_key")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    gemini_model = genai.GenerativeModel('gemini-2.5-flash')
+    gemini_model = genai.GenerativeModel('gemini-1.5-flash')
     GEMINI_ENABLED = True
 else:
     GEMINI_ENABLED = False
@@ -254,4 +254,5 @@ st.sidebar.markdown("---")
 if not FOOTBALL_DATA_API_KEY: st.sidebar.warning("Football-data.org key missing.")
 if not GEMINI_API_KEY: st.sidebar.warning("Gemini key missing.")
 if ml_model is None: st.sidebar.error(f"ML Model Error for {selected_league_name}: {ml_status}")
+
 if historical_df is None: st.sidebar.error(f"Historical Data Error for {selected_league_name}: {historical_status}")
